@@ -36,7 +36,7 @@ That's it. Restart Claude Code.
 
 ## What it shows
 
-`/project-name | (main) | claude-opus-4-6 | ctx [████████░░] 78% | 5h [███░░░░░░░] 28% Reset in 1h42m`
+`/project-name (main) Opus 4.5 [high] ctx [████████░░] 78% · 5h [███░░░░░░░] 28% Reset in 1h42m`
 
 | Segment | Description |
 |---|---|
@@ -50,3 +50,16 @@ That's it. Restart Claude Code.
 ## Uninstall
 
 Remove the `statusLine` block from `~/.claude/settings.json` and delete `~/.claude/statusline-command.sh`.
+
+More details: [claude-statusline/README.md](claude-statusline/README.md).
+
+---
+
+# claude-statusline-ts
+
+A fuller status line in TypeScript, run by Node 24: git staged/unstaged details, session cost and
+duration, daily/monthly/per-project spend (local SQLite), interactive configurator. Unlike the bash
+version, it reads your Claude Code OAuth token to query the usage API.
+
+See [claude-statusline-ts/README.md](claude-statusline-ts/README.md) for install steps, data and
+privacy notes.

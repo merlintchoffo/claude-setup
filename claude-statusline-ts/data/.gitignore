@@ -1,0 +1,4 @@
+# Données locales (base des dépenses, cache des limites) : jamais versionnées
+*
+!.gitignore
+!.gitkeep

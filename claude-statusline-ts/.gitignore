@@ -1,0 +1,4 @@
+node_modules/
+coverage/
+# Configuration personnelle, créée par « npm run config »
+statusline.config.json

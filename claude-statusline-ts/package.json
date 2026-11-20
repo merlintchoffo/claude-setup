@@ -1,0 +1,27 @@
+{
+	"name": "claude-statusline-ts",
+	"version": "1.0.0",
+	"private": true,
+	"type": "module",
+	"description": "Statusline Claude Code en TypeScript, exécutée par Node 24 sans compilation.",
+	"engines": { "node": ">=24.2" },
+	"scripts": {
+		"start": "node src/index.ts",
+		"test": "node --test --test-reporter=spec \"__tests__/**/*.test.ts\"",
+		"test:couverture": "node --test --experimental-test-coverage --test-coverage-exclude=\"__tests__/**\" --test-coverage-exclude=\"node_modules/**\" \"__tests__/**/*.test.ts\"",
+		"typecheck": "tsc --noEmit -p tsconfig.json",
+		"config": "node src/commands/interactive-config.ts",
+		"spend:today": "node src/lib/features/spend/commands/spend-day.ts",
+		"spend:month": "node src/lib/features/spend/commands/spend-month.ts",
+		"spend:project": "node src/lib/features/spend/commands/spend-project.ts",
+		"limits:weekly": "node src/lib/features/limits/commands/weekly-analysis.ts"
+	},
+	"dependencies": {
+		"picocolors": "1.1.1",
+		"table": "6.9.0"
+	},
+	"devDependencies": {
+		"@types/node": "24.10.1",
+		"typescript": "5.9.3"
+	}
+}
