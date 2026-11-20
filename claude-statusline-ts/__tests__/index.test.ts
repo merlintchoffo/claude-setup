@@ -134,12 +134,22 @@ describe("statusline de bout en bout (processus séparé)", () => {
 		assert.doesNotMatch(stripVTControlCharacters(r.sortie), / 31%/, "pas la valeur de context_window de l'exemple");
 	});
 
-	it("context_window sans current_usage (session pas commencée) : « S: - »", () => {
+	it("context_window sans current_usage ni pourcentage (session pas commencée) : coût et durée, « - » pour le contexte", () => {
 		const r = lancer("src/index.ts", {
 			entree: payload({ context_window: { total_input_tokens: 0, total_output_tokens: 0, context_window_size: 200000 } }),
 			env: env(),
 		});
-		assert.match(stripVTControlCharacters(r.sortie), /S: -/);
+		assert.match(stripVTControlCharacters(r.sortie), /S: \$0\.2 - \(6m\)/);
+	});
+
+	it("context_window avec used_percentage mais sans current_usage : pourcentage et jetons estimés affichés", () => {
+		const r = lancer("src/index.ts", {
+			entree: payload({ context_window: { total_input_tokens: 0, total_output_tokens: 0, context_window_size: 200000, used_percentage: 37 } }),
+			env: env(),
+		});
+		const texte = stripVTControlCharacters(r.sortie);
+		assert.match(texte, / 74k /, texte);
+		assert.match(texte, / 37%/, texte);
 	});
 
 	it("limites présentes (cache, sans réseau) : 5 h et semaine affichées", () => {

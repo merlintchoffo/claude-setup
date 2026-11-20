@@ -133,12 +133,20 @@ function formatSessionPart(
 	maxTokens: number,
 	config: StatuslineConfig["session"],
 ): string {
-	// No context data yet - show placeholder
-	if (contextTokens === null || contextPercentage === null) {
-		return `${colors.gray("S:")} ${colors.gray("-")}`;
-	}
-
 	const items: string[] = [];
+
+	// Pas encore de données de contexte : coût et durée restent affichés, « - » pour le contexte.
+	if (contextTokens === null || contextPercentage === null) {
+		if (config.cost.enabled) {
+			items.push(`${colors.gray("$")}${colors.dimWhite(formatCost(cost, config.cost.format))}`);
+		}
+		items.push(colors.gray("-"));
+		if (config.duration.enabled) {
+			items.push(colors.gray(`(${formatDuration(durationMs)})`));
+		}
+		const sepVide = config.infoSeparator ? ` ${colors.gray(config.infoSeparator)} ` : " ";
+		return `${colors.gray("S:")} ${items.join(sepVide)}`;
+	}
 
 	if (config.cost.enabled) {
 		const formattedCost = formatCost(cost, config.cost.format);

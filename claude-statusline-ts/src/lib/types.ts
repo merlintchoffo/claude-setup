@@ -25,6 +25,7 @@ export interface HookInput {
 		total_input_tokens: number;
 		total_output_tokens: number;
 		context_window_size: number;
+		used_percentage?: number;
 		current_usage?: {
 			input_tokens: number;
 			output_tokens: number;

@@ -121,8 +121,14 @@ export async function main() {
 					100,
 					Math.round((contextTokens / maxTokens) * 100),
 				);
+			} else if (typeof input.context_window?.used_percentage === "number") {
+				// Pas de détail par jeton, mais Claude Code fournit le pourcentage : jetons estimés.
+				const taille =
+					input.context_window.context_window_size || config.context.maxContextTokens;
+				contextPercentage = Math.min(100, Math.round(input.context_window.used_percentage));
+				contextTokens = Math.round((input.context_window.used_percentage / 100) * taille);
 			} else {
-				// No context data yet - session not started
+				// Aucune donnée de contexte : session qui démarre.
 				contextTokens = null;
 				contextPercentage = null;
 			}

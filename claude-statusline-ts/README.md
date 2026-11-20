@@ -46,7 +46,7 @@ Les parties sont séparées par `•`. De gauche à droite :
 | `⣿⣿⣿⣿⣶⣀⣀⣀⣀⣀` | barre de remplissage du contexte (voir « Barres et couleurs ») |
 | `46%` | part de la fenêtre de contexte occupée. Claude Code compacte automatiquement la conversation avant 100 % |
 | `(47m)` | durée de la session (`1h 5m` au-delà d'une heure) |
-| `S: -` | pas encore de données de contexte (session qui démarre) |
+| `S: $0.0 - (0m)` | `-` à la place du contexte : Claude Code n'a pas encore transmis l'usage du contexte (session qui démarre, avant la première réponse). Coût et durée restent affichés. Si Claude Code ne fournit que le pourcentage, les jetons sont estimés à partir de lui |
 
 ### `L:`, la limite d'usage sur 5 heures
 
@@ -106,7 +106,7 @@ les couleurs se règlent avec `npm run config`.
 | Dépenses du jour, par projet, par mois | non | oui (base SQLite locale) |
 | Personnalisation | modifier le script | configurateur interactif, 3 préréglages |
 | Temps par rafraîchissement (mesuré) | ~40 ms | ~130 ms (+ un appel réseau par minute au plus) |
-| Tests | aucun | 194 tests, 99,6 % des lignes couvertes |
+| Tests | aucun | 196 tests, 99,6 % des lignes couvertes |
 
 Choisir la version bash pour une installation en une commande et le minimum d'accès.
 Choisir celle-ci pour le détail git, le coût et le suivi des dépenses.
@@ -243,7 +243,7 @@ supprimer `src/lib/features/limits/`.
 
 ## Tests
 
-`npm test` lance 194 tests, sans réseau et sans toucher à vos données : chaque test travaille
+`npm test` lance 196 tests, sans réseau et sans toucher à vos données : chaque test travaille
 dans un dossier temporaire (`STATUSLINE_DATA_DIR`, `STATUSLINE_CONFIG`, `HOME` isolés), le
 jeton et l'API sont simulés, et git est testé sur de vrais dépôts temporaires. Les commandes
 sont lancées comme par l'utilisateur ; le configurateur l'est dans un vrai pseudo-terminal

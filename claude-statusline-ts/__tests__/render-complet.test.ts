@@ -51,8 +51,13 @@ describe("partie git", () => {
 });
 
 describe("partie session", () => {
-	it("pas encore de contexte : « S: - »", () => {
-		assert.match(rendu(donnees({ contextTokens: null, contextPercentage: null })), /S: -/);
+	it("pas encore de contexte : coût et durée affichés, « - » à la place du contexte", () => {
+		const r = rendu(donnees({ contextTokens: null, contextPercentage: null }));
+		assert.match(r, /S: \$1\.2 - \(2m\)/, r);
+	});
+	it("pas de contexte et tout le reste désactivé : « S: - »", () => {
+		const c = cfg((x) => { x.session.cost.enabled = false; x.session.duration.enabled = false; });
+		assert.match(rendu(donnees({ contextTokens: null, contextPercentage: null }), c), /S: -( |$)/);
 	});
 	it("jetons avec maximum (showMax)", () => {
 		const r = rendu(donnees(), cfg((c) => { c.session.tokens.enabled = true; c.session.tokens.showMax = true; }));
