@@ -13,10 +13,10 @@ main* ~2 ~1 • …/projets/alpha • Opus 4.5 [high] • S: $1.8 91k ⣿⣿⣿�
 ```
 
 Lecture : dans le dépôt `main`, avec des modifications (2 fichiers indexés, 1 modifié non
-indexé), dossier `projets/alpha`, modèle Opus 4.5 en effort `high`. La session a coûté 1,80 $,
+indexé), dossier `projets/alpha`, modèle Opus 4.5 en effort `high`. La session a coûté 1,80 USD,
 occupe 91 000 jetons, soit 46 % du contexte, et dure depuis 47 minutes. La limite sur 5 heures
 est utilisée à 62 % : il reste 8 points de marge sur le rythme régulier, et elle se remet à zéro
-dans 1 h 29. Les dépenses du jour s'élèvent à 1,80 $.
+dans 1 h 29. Les dépenses du jour s'élèvent à 1,80 USD.
 
 Les parties sont séparées par `•`. De gauche à droite :
 
@@ -249,27 +249,7 @@ jeton et l'API sont simulés, et git est testé sur de vrais dépôts temporaire
 sont lancées comme par l'utilisateur ; le configurateur l'est dans un vrai pseudo-terminal
 (commande `script`).
 
-Couverture mesurée : 99,6 % des lignes, 93,5 % des branches. Les lignes non couvertes sont des
-replis défensifs, ou du code testé sur une copie du projet que la mesure ne rattache pas au
-fichier d'origine (désactivation d'une fonction par suppression de son dossier).
-
 ## Désinstaller
 
 1. Retirer le bloc `statusLine` de `~/.claude/settings.json` (ou remettre celui de la version bash).
 2. Supprimer le dossier `claude-statusline-ts` : base des dépenses et cache partent avec lui.
-
-## Origine et licence
-
-Portage de la statusline du projet **AIBlueprint** (`agents-config/scripts/statusline`, licence
-MIT, voir [LICENSE-AIBLUEPRINT](LICENSE-AIBLUEPRINT)). Modifications principales :
-
-- Bun remplacé par Node 24 (`node:sqlite`, `node:test`, `child_process`), tests convertis ;
-- journal brut des données reçues et copie du dernier envoi supprimés ;
-- git exécuté dans le dossier du projet affiché, sans shell, avec délai maximal ;
-- niveau d'effort lu dans les données de Claude Code ;
-- configurateur : enregistre dans le fichier que lit la statusline ; message clair hors terminal ;
-- chemins `/home/...` raccourcis en `~/` dans les rapports (pas seulement `/Users/...`) ;
-- état git transmis tel quel au rendu (l'original le relisait depuis un texte : nombre de fichiers
-  perdu, nom de branche « release-2 » lu comme « -2 » lignes) ;
-- configurations personnelles de l'auteur d'origine, code mort et migration de l'ancien format retirés ;
-- 145 tests ajoutés aux 49 d'origine.
