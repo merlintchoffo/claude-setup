@@ -7,19 +7,9 @@ import {
 	type StatuslineConfig,
 } from "./lib/config.ts";
 import { getContextData } from "./lib/context.ts";
-import {
-	colors,
-	formatBranch,
-	formatCost,
-	formatDuration,
-	formatPath,
-} from "./lib/formatters.ts";
+import { colors } from "./lib/formatters.ts";
 import { getGitStatus } from "./lib/git.ts";
-import {
-	renderStatusline,
-	type StatuslineData,
-	type UsageLimit,
-} from "./lib/render-pure.ts";
+import { type RawStatuslineData, renderStatuslineRaw } from "./lib/render-pure.ts";
 import type { HookInput } from "./lib/types.ts";
 
 // Optional feature imports - just delete the folder to disable!
@@ -163,9 +153,17 @@ export async function main() {
 			todayCost = getTodayCostV2();
 		}
 
-		const data: StatuslineData = {
-			branch: formatBranch(git, config.git),
-			dirPath: formatPath(input.workspace.current_dir, config.pathDisplayMode),
+		// Données brutes transmises au rendu : le formatage a lieu une seule fois, dans
+		// renderStatuslineRaw. (L'ancien chemin passait par un texte relu ensuite, ce qui
+		// perdait le nombre de fichiers git et lisait « release-2 » comme « -2 » lignes.)
+		const data: RawStatuslineData = {
+			git: {
+				branch: git.branch,
+				dirty: git.hasChanges,
+				staged: git.staged,
+				unstaged: git.unstaged,
+			},
+			path: input.workspace?.current_dir || input.cwd,
 			modelName: (() => {
 				const shortName = input.model.display_name.replace(
 					/\s*\((\d+[KM])\s+context\)/i,
@@ -175,11 +173,8 @@ export async function main() {
 				const effort = input.effort?.level || claudeSettings.effortLevel;
 				return effort ? `${shortName} [${effort}]` : shortName;
 			})(),
-			sessionCost: formatCost(
-				input.cost.total_cost_usd,
-				config.session.cost.format,
-			),
-			sessionDuration: formatDuration(input.cost.total_duration_ms),
+			cost: input.cost?.total_cost_usd ?? 0,
+			durationMs: input.cost?.total_duration_ms ?? 0,
 			contextTokens,
 			contextPercentage,
 			...(getUsageLimits && {
@@ -202,7 +197,7 @@ export async function main() {
 			thinkingEnabled: claudeSettings.alwaysThinkingEnabled ?? true,
 		};
 
-		const output = renderStatusline(data, config);
+		const output = renderStatuslineRaw(data, config);
 		console.log(output);
 		if (config.oneLine) {
 			console.log("");

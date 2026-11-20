@@ -4,14 +4,94 @@ Statusline pour [Claude Code](https://claude.ai/code), écrite en TypeScript et 
 directement par Node 24, sans compilation. Elle affiche en bas de Claude Code l'état de la
 session : dépôt git, dossier, modèle, coût, durée, contexte, limites d'usage et dépenses du jour.
 
+## Ce qui s'affiche
+
+Exemple réel, avec la configuration par défaut :
+
 ```
-main* ~2 • …/projets/alpha • Opus 4.5 [high] • S: $0.2 63k ⣿⣿⣿⣄⣀⣀⣀⣀⣀⣀ 31% (6m) • L: ⣿⣿⣿⣿⣤⣀⣀⣀⣀⣀ 43% (-5.8%) (3h8m) • D: $0.2
+main* ~2 ~1 • …/projets/alpha • Opus 4.5 [high] • S: $1.8 91k ⣿⣿⣿⣿⣶⣀⣀⣀⣀⣀ 46% (47m) • L: ⣿⣿⣿⣿⣿⣿⣄⣀⣀⣀ 62% (+8.0%) (1h29m) • D: $1.8
 ```
 
-Branche (`*` = modifications, `~2` = fichiers indexés) • dossier • modèle [effort] •
-**S**ession : coût, jetons, contexte, durée • **L**imite 5 h : utilisation, écart de rythme,
-temps avant remise à zéro • **D**épenses du jour. La **W** (semaine) apparaît quand la limite
-5 h dépasse 90 % (réglable).
+Lecture : dans le dépôt `main`, avec des modifications (2 fichiers indexés, 1 modifié non
+indexé), dossier `projets/alpha`, modèle Opus 4.5 en effort `high`. La session a coûté 1,80 $,
+occupe 91 000 jetons, soit 46 % du contexte, et dure depuis 47 minutes. La limite sur 5 heures
+est utilisée à 62 % : il reste 8 points de marge sur le rythme régulier, et elle se remet à zéro
+dans 1 h 29. Les dépenses du jour s'élèvent à 1,80 $.
+
+Les parties sont séparées par `•`. De gauche à droite :
+
+### Git
+
+| Affiché | Signification |
+|---|---|
+| `main` | branche courante ; `detached` si la tête est détachée ; `no-git` hors dépôt |
+| `*` (violet), collé à la branche | modifications non commitées (indexées ou non) |
+| `~2` (gris) | nombre de fichiers **indexés** (`git add`), prêts à être commités |
+| `~1` (jaune) | nombre de fichiers **modifiés non indexés** |
+| `+12 -3` (vert / rouge) | lignes ajoutées / supprimées, indexées et non indexées confondues. Masqué par défaut (`showChanges`) |
+
+### Dossier et modèle
+
+| Affiché | Signification |
+|---|---|
+| `…/projets/alpha` | deux derniers dossiers du chemin ; `~` remplace le dossier personnel. Réglable : chemin complet ou dernier dossier seul |
+| `Opus 4.5 [high]` | modèle utilisé, puis niveau d'effort entre crochets. Le nom est masqué quand c'est un Sonnet (`showSonnetModel`) |
+
+### `S:`, la session en cours
+
+| Affiché | Signification |
+|---|---|
+| `$1.8` | coût de la session depuis son début, en dollars, arrondi au dixième |
+| `91k` | jetons occupés dans le contexte (`k` = milliers, `m` = millions) |
+| `⣿⣿⣿⣿⣶⣀⣀⣀⣀⣀` | barre de remplissage du contexte (voir « Barres et couleurs ») |
+| `46%` | part de la fenêtre de contexte occupée. Claude Code compacte automatiquement la conversation avant 100 % |
+| `(47m)` | durée de la session (`1h 5m` au-delà d'une heure) |
+| `S: -` | pas encore de données de contexte (session qui démarre) |
+
+### `L:`, la limite d'usage sur 5 heures
+
+| Affiché | Signification |
+|---|---|
+| `⣿⣿⣿⣿⣿⣿⣄⣀⣀⣀` `62%` | part de la limite 5 h déjà consommée |
+| `(+8.0%)` | **écart de rythme** : part du temps écoulé dans la fenêtre, moins part consommée. **Positif = marge** (vous consommez moins vite que le temps ne passe) ; **négatif = vous allez trop vite**, et la limite sera atteinte avant la remise à zéro à ce rythme |
+| `(1h29m)` | temps avant la remise à zéro de la fenêtre |
+
+Exemple : à 3 h 30 d'une fenêtre de 5 h (70 % du temps écoulé), avec 62 % consommés, l'écart vaut
+70 − 62 = **+8,0**. Couleur de l'écart : vert au-delà de +5, gris entre 0 (exclu) et +5, jaune de 0 à −10,
+rouge en dessous de −10.
+
+### `W:`, la limite sur 7 jours
+
+```
+… • L: ⣿⣿⣿⣿⣿⣿⣄⣀⣀⣀ 62% (+8.0%) (1h29m) • W: ⣿⣿⣿⣿⣷⣀⣀⣀⣀⣀ 48% (+4.4%) (79h59m) • D: $1.8
+```
+
+Même lecture que `L:`, sur la fenêtre hebdomadaire ; le temps restant est en heures. **Par défaut,
+`W:` n'apparaît que lorsque la limite 5 h dépasse 90 %** : c'est alors que la limite hebdomadaire
+devient utile à surveiller. Réglable sur « toujours » ou « jamais » (`npm run config`, onglet Weekly).
+
+### `D:`, les dépenses du jour
+
+`$1.8` : total du jour, toutes sessions et tous projets confondus, d'après la base locale. Le
+coût de chaque session n'est compté qu'une fois : après un `/clear`, la nouvelle session reprend
+le coût cumulé de l'ancienne, et seul le dépassement est ajouté. La partie disparaît tant que le
+total vaut 0. Pour le détail : `npm run spend:today`.
+
+### Messages particuliers
+
+| Affiché | Signification |
+|---|---|
+| `Thinking: OFF` (rouge) | la réflexion étendue est désactivée dans `~/.claude/settings.json` (`alwaysThinkingEnabled: false`) |
+| `Error: …` puis `Check statusline configuration` | la statusline n'a pas pu se calculer (données reçues illisibles, par exemple). Claude Code continue de fonctionner normalement |
+| `L:` absent | limites non disponibles : pas de jeton, API injoignable ou fonction désactivée |
+
+### Barres et couleurs
+
+Chaque barre fait 10 cases. `⣿` est une case pleine et `⣀` une case vide ; les caractères
+intermédiaires (`⣄ ⣤ ⣦ ⣶ ⣷`) remplissent une case par sixièmes, pour plus de précision. Couleur
+de la barre selon le pourcentage : **gris** sous 50 %, **jaune** de 50 à 69 %, **orange** de 70 à
+89 %, **rouge** à partir de 90 %. Le style (`braille`, `filled` `█░`, `rectangle`), la longueur et
+les couleurs se règlent avec `npm run config`.
 
 ## Laquelle choisir : `claude-statusline` ou `claude-statusline-ts` ?
 
@@ -26,7 +106,7 @@ temps avant remise à zéro • **D**épenses du jour. La **W** (semaine) appara
 | Dépenses du jour, par projet, par mois | non | oui (base SQLite locale) |
 | Personnalisation | modifier le script | configurateur interactif, 3 préréglages |
 | Temps par rafraîchissement (mesuré) | ~40 ms | ~130 ms (+ un appel réseau par minute au plus) |
-| Tests | aucun | 193 tests, 99,6 % des lignes couvertes |
+| Tests | aucun | 194 tests, 99,6 % des lignes couvertes |
 
 Choisir la version bash pour une installation en une commande et le minimum d'accès.
 Choisir celle-ci pour le détail git, le coût et le suivi des dépenses.
@@ -163,13 +243,13 @@ supprimer `src/lib/features/limits/`.
 
 ## Tests
 
-`npm test` lance 193 tests, sans réseau et sans toucher à vos données : chaque test travaille
+`npm test` lance 194 tests, sans réseau et sans toucher à vos données : chaque test travaille
 dans un dossier temporaire (`STATUSLINE_DATA_DIR`, `STATUSLINE_CONFIG`, `HOME` isolés), le
 jeton et l'API sont simulés, et git est testé sur de vrais dépôts temporaires. Les commandes
 sont lancées comme par l'utilisateur ; le configurateur l'est dans un vrai pseudo-terminal
 (commande `script`).
 
-Couverture mesurée : 99,6 % des lignes, 94 % des branches. Les lignes non couvertes sont des
+Couverture mesurée : 99,6 % des lignes, 93,5 % des branches. Les lignes non couvertes sont des
 replis défensifs, ou du code testé sur une copie du projet que la mesure ne rattache pas au
 fichier d'origine (désactivation d'une fonction par suppression de son dossier).
 
@@ -189,5 +269,7 @@ MIT, voir [LICENSE-AIBLUEPRINT](LICENSE-AIBLUEPRINT)). Modifications principales
 - niveau d'effort lu dans les données de Claude Code ;
 - configurateur : enregistre dans le fichier que lit la statusline ; message clair hors terminal ;
 - chemins `/home/...` raccourcis en `~/` dans les rapports (pas seulement `/Users/...`) ;
+- état git transmis tel quel au rendu (l'original le relisait depuis un texte : nombre de fichiers
+  perdu, nom de branche « release-2 » lu comme « -2 » lignes) ;
 - configurations personnelles de l'auteur d'origine, code mort et migration de l'ancien format retirés ;
-- 144 tests ajoutés aux 49 d'origine.
+- 145 tests ajoutés aux 49 d'origine.

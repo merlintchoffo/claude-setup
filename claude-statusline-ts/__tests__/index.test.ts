@@ -89,6 +89,27 @@ describe("statusline de bout en bout (processus séparé)", () => {
 		assert.match(lancer("src/index.ts", { entree: payload(sonnet), env: env({ STATUSLINE_CONFIG: avec }) }).sortie, /Sonnet 4\.5/);
 	});
 
+	it("git réel : « * », fichiers indexés et non indexés comptés ; nom de branche avec tiret et chiffre intact", () => {
+		const d = dossierTemporaire("statusline-git-reel-");
+		git(d, "init", "-q", "-b", "release-2");
+		writeFileSync(join(d, "a.txt"), "1\n");
+		git(d, "add", ".");
+		git(d, "commit", "-q", "-m", "i");
+		writeFileSync(join(d, "b.txt"), "x\n");
+		writeFileSync(join(d, "c.txt"), "y\n");
+		git(d, "add", "b.txt", "c.txt"); // 2 fichiers indexés
+		writeFileSync(join(d, "a.txt"), "1\n2\n"); // 1 fichier modifié non indexé
+		const avec = join(home, "git-complet.json");
+		writeFileSync(avec, JSON.stringify({ git: { showChanges: true, showStaged: true, showUnstaged: true } }));
+		const r = lancer("src/index.ts", {
+			entree: payload({ cwd: d, workspace: { current_dir: d, project_dir: d } }),
+			env: env({ STATUSLINE_CONFIG: avec }),
+		});
+		const texte = stripVTControlCharacters(r.sortie);
+		assert.match(texte, /^release-2\* \+3 ~2 ~1 /, texte);
+		supprimer(d);
+	});
+
 	it("git.enabled: false : la branche n'apparaît pas (appliqué au rendu)", () => {
 		const sansGit = join(home, "sans-git.json");
 		writeFileSync(sansGit, JSON.stringify({ git: { enabled: false } }));
