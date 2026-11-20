@@ -253,3 +253,14 @@ sont lancées comme par l'utilisateur ; le configurateur l'est dans un vrai pseu
 
 1. Retirer le bloc `statusLine` de `~/.claude/settings.json` (ou remettre celui de la version bash).
 2. Supprimer le dossier `claude-statusline-ts` : base des dépenses et cache partent avec lui.
+
+## Origine et licence
+
+Portage de la statusline du projet **AIBlueprint** (`agents-config/scripts/statusline`, licence
+MIT, voir [LICENSE-AIBLUEPRINT](LICENSE-AIBLUEPRINT)). Modifications principales :
+
+- Bun remplacé par Node 24 (`node:sqlite`, `node:test`, `child_process`), tests convertis ;
+- journal brut des données reçues et copie du dernier envoi supprimés ;
+- git exécuté dans le dossier du projet affiché, sans shell, avec délai maximal ;
+- niveau d'effort lu dans les données de Claude Code ;
+- configurateur : enregistre dans le fichier que lit la statusline ; message clair hors terminal.
